@@ -13,10 +13,10 @@ Raft-Go is a Go implementation of the Raft consensus algorithm, aiming to explor
 ## Getting Started 🚀
 
 1. **Clone the repository**:
-   aaa
+   ```
    git clone https://github.com/ashupednekar/raft-go.git
    cd raft-go
-   aaa
+   ```
 
 2. **Run the example** (details to be added for a basic execution). 🎈
 
