@@ -1,8 +1,6 @@
 # Raft-Go 🚀
 
-**Re-inventing the (raft) xD for fun** 🎉
-
-![image-removebg-preview-2](https://github.com/user-attachments/assets/11631256-1e04-4d40-84c9-77c001541ff7)
+**Re-inventing the (raft) xD for fun** 🎉  <img src="https://github.com/user-attachments/assets/11631256-1e04-4d40-84c9-77c001541ff7" alt="raft image" width="250" style="float: right; margin-left: 10px;">
 
 Raft-Go is a Go implementation of the Raft consensus algorithm, aiming to explore distributed consensus principles in a fun, educational way. 🤓
 
