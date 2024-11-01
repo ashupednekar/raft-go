@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "github.com/ashupednekar/raft-go/int32ernal/raft";
+option go_package = "github.com/ashupednekar/raft-go/internal/raft";
 
 package raft;
 
@@ -10,7 +10,7 @@ service RaftService{
 }
 
 message Entry{
-  string name;
+  string name = 1;
 }
 
 message EntryInput{
@@ -19,7 +19,7 @@ message EntryInput{
   int32 prevLogIndex = 3;
   int32 prevLogTerm = 4;
   int32 leaderCommit = 5;
-  repeated Entry entries = 6 [packed = true];
+  repeated Entry entries = 6;
 }
 
 message EntryResult{
