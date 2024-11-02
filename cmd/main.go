@@ -1,9 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"math/rand"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/ashupednekar/raft-go/internal/server"
 )
@@ -13,7 +16,25 @@ func main(){
   if err != nil{
     log.Fatalf("port env not set: %v", err)
   }
-  go server.StartServer(os.Getenv("SERVER_ID"), port)
+
+  s := server.Server{}
+  s.LastHeartBeat = time.Now()
+
+  go s.Start(os.Getenv("SERVER_ID"), port)
+
+  go func(s *server.Server){
+    electionTimeout, err := time.ParseDuration(fmt.Sprintf("%ds", rand.Intn(6)+ 5))
+    if err != nil{
+      log.Fatalf("error calculating election timeout: %v", err)
+    }
+    for {
+      fmt.Printf("last: %v | now: %v| timeout: %v\n", s.LastHeartBeat, time.Now(), electionTimeout)
+      if s.LastHeartBeat.Before(time.Now().Add(-electionTimeout)){
+        fmt.Println("No viable leader found, initiating election")
+      } 
+      time.Sleep(electionTimeout)
+    }
+  }(&s)
 
   select{}
 }

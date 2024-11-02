@@ -5,29 +5,38 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"time"
 
 	"github.com/ashupednekar/raft-go/internal"
 	pb "github.com/ashupednekar/raft-go/internal/server/raft"
 	"google.golang.org/grpc"
 )
 
-type server struct {
-  name string
-  state internal.State
+type Server struct {
+  Id int 
+  State internal.State
+  LastHeartBeat time.Time
   pb.UnimplementedRaftServiceServer
 }
 
-func (s *server) AppendEntries(ctx context.Context, in *pb.EntryInput) (*pb.EntryResult, error){
+func (s *Server) AppendEntries(ctx context.Context, in *pb.EntryInput) (*pb.EntryResult, error){
+  s.LastHeartBeat = time.Now()
+  current_term := int32(s.State.PersistentState.CurrentTerm)
+  if in.Term < current_term{
+    return &pb.EntryResult{Term: current_term, Success: false}, nil
+  }else{
+    
+  }
   return &pb.EntryResult{}, nil
 }
 
-func (s *server) RequestVote(ctx context.Context, in *pb.VoteInput) (*pb.VoteResult, error){
-  current_term := int32(s.state.PersistentState.CurrentTerm)
+func (s *Server) RequestVote(ctx context.Context, in *pb.VoteInput) (*pb.VoteResult, error){
+  current_term := int32(s.State.PersistentState.CurrentTerm)
   if in.Term < current_term{
     return &pb.VoteResult{Term: current_term, VoteGranted: false}, nil
   }else{
-    if s.state.PersistentState.VotedFor == 0 || int32(s.state.PersistentState.VotedFor) == in.CandidateId{
-      if in.LastLogIndex >= int32(s.state.CommitIndex){
+    if s.State.PersistentState.VotedFor == 0 || int32(s.State.PersistentState.VotedFor) == in.CandidateId{
+      if in.LastLogIndex >= int32(s.State.CommitIndex){
         return &pb.VoteResult{Term: current_term, VoteGranted: true}, nil
       }
     }
@@ -35,17 +44,17 @@ func (s *server) RequestVote(ctx context.Context, in *pb.VoteInput) (*pb.VoteRes
   }
 } 
 
-func StartServer(name string, port int){
+func (s *Server) Start (name string, port int){
   ln, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
   if err != nil{
     log.Fatalf("failed to listen at port 8001: %v", err)
   }
 
-  s := grpc.NewServer()
-  pb.RegisterRaftServiceServer(s, &server{name: name})
+  grpcServer := grpc.NewServer()
+  pb.RegisterRaftServiceServer(grpcServer, s)
 
   log.Printf("gRPC server %s listening at %v", name, ln.Addr())
-  if err := s.Serve(ln); err != nil{
+  if err := grpcServer.Serve(ln); err != nil{
     log.Fatalf("failed to start gRPC server: %v", err)
   }
 }
