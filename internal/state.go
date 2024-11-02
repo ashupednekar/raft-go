@@ -6,7 +6,6 @@ import (
 	"os"
 )
 
-
 type PersistentState struct{
   CurrentTerm int `json:"current_term"`
   VotedFor string `json:"voted_for"`
