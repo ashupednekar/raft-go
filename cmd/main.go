@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/ashupednekar/raft-go/internal"
 	"github.com/ashupednekar/raft-go/internal/server"
 )
 
@@ -23,7 +24,7 @@ func main(){
   go s.Start(os.Getenv("SERVER_ID"), port)
 
   go func(s *server.Server){
-    electionTimeout, err := time.ParseDuration(fmt.Sprintf("%ds", rand.Intn(6)+ 5))
+    electionTimeout, err := time.ParseDuration(fmt.Sprintf("%dms", rand.Intn(6000)+ 5850))
     if err != nil{
       log.Fatalf("error calculating election timeout: %v", err)
     }
@@ -31,6 +32,7 @@ func main(){
       fmt.Printf("last: %v | now: %v| timeout: %v\n", s.LastHeartBeat, time.Now(), electionTimeout)
       if s.LastHeartBeat.Before(time.Now().Add(-electionTimeout)){
         fmt.Println("No viable leader found, initiating election")
+        internal.InitiateElection(s)
       } 
       time.Sleep(electionTimeout)
     }

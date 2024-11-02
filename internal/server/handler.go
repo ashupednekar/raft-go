@@ -7,14 +7,14 @@ import (
 	"net"
 	"time"
 
-	"github.com/ashupednekar/raft-go/internal"
 	pb "github.com/ashupednekar/raft-go/internal/server/raft"
+	"github.com/ashupednekar/raft-go/internal/state"
 	"google.golang.org/grpc"
 )
 
 type Server struct {
   Id int 
-  State internal.State
+  State state.State
   LastHeartBeat time.Time
   pb.UnimplementedRaftServiceServer
 }
