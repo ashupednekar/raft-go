@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+option go_package = "github.com/ashupednekar/raft-go/internal/raft";
+
+package raft;
+
+service RaftService{
+  rpc AppendEntries(EntryInput) returns (EntryResult);
+  rpc RequestVote(VoteInput) returns (VoteResult);
+}
+
+message Entry{
+  string name = 1;
+}
+
+message EntryInput{
+  int32 term = 1;
+  int32 leaderId = 2;
+  int32 prevLogIndex = 3;
+  int32 prevLogTerm = 4;
+  int32 leaderCommit = 5;
+  repeated Entry entries = 6;
+}
+
+message EntryResult{
+  int32 term = 1;
+  bool success = 2;
+}
+
+message VoteInput{
+  int32 term = 1;
+  int32 candidateId = 2;
+  int32 lastLogIndex = 3;
+  int32 lastLogTerm = 4;
+}
+
+message VoteResult{
+  int32 term = 1;
+  bool voteGranted = 2;
+}
