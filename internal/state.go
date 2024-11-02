@@ -8,7 +8,7 @@ import (
 
 type PersistentState struct{
   CurrentTerm int `json:"current_term"`
-  VotedFor string `json:"voted_for"`
+  VotedFor int `json:"voted_for"`
 }
 
 type LeaderState struct{
@@ -17,7 +17,7 @@ type LeaderState struct{
 }
 
 type State struct{
-  Name string
+  Id int 
   CommitIndex int
   LastAppliedIndex int
   PersistentState PersistentState
@@ -27,7 +27,7 @@ type State struct{
 
 func (s *State) AppendLog(entry string) error {
   s.Log = append(s.Log, entry)
-  file, err := os.OpenFile(fmt.Sprintf("%s.log", s.name), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+  file, err := os.OpenFile(fmt.Sprintf("%d.log", s.Id), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
   if err != nil{
     fmt.Printf("error opening log file: %v\n", err)
     return err
@@ -44,7 +44,7 @@ func (s *State) AppendLog(entry string) error {
 }
 
 func (s *State) SavePersistentState() error {
-  file, err := os.Create(fmt.Sprintf("%s.json", s.Name))
+  file, err := os.Create(fmt.Sprintf("%d.json", s.Id))
   if err != nil{
     fmt.Printf("error creating file: %v\n", err)
     return err
@@ -67,7 +67,7 @@ func (s *State) SavePersistentState() error {
 }
 
 func (s *State) LoadPersistentState() error {
-  file, err := os.Open(fmt.Sprintf("%s.json", s.Name))
+  file, err := os.Open(fmt.Sprintf("%d.json", s.Id))
   defer file.Close()
   if err != nil{
     fmt.Printf("error reading persistent state: %v\n", err)

@@ -13,7 +13,7 @@ func main(){
   if err != nil{
     log.Fatalf("port env not set: %v", err)
   }
-  go server.StartServer(os.Getenv("SERVER_NAME"), port)
+  go server.StartServer(os.Getenv("SERVER_ID"), port)
 
   select{}
 }

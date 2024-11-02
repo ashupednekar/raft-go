@@ -26,7 +26,7 @@ func (s *server) RequestVote(ctx context.Context, in *pb.VoteInput) (*pb.VoteRes
   if in.Term < current_term{
     return &pb.VoteResult{Term: current_term, VoteGranted: false}, nil
   }else{
-    if s.state.PersistentState.VotedFor == "" || s.state.PersistentState.VotedFor == in.CandidateId{
+    if s.state.PersistentState.VotedFor == 0 || int32(s.state.PersistentState.VotedFor) == in.CandidateId{
       if in.LastLogIndex >= int32(s.state.CommitIndex){
         return &pb.VoteResult{Term: current_term, VoteGranted: true}, nil
       }
