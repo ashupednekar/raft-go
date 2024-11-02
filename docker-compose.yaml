@@ -1,0 +1,40 @@
+services:
+  
+  server1:
+    container_name: server1
+    image: server
+    environment:
+      - SERVER_NAME=one
+      - SERVER_PORT=8001
+
+  server2:
+    container_name: server2
+    image: server
+    environment:
+      - SERVER_NAME=two
+      - SERVER_PORT=8002
+
+  server3:
+    container_name: server3
+    image: server
+    environment:
+      - SERVER_NAME=three
+      - SERVER_PORT=8003
+ 
+  server4:
+    container_name: server4
+    image: server
+    environment:
+      - SERVER_NAME=four
+      - SERVER_PORT=8004
+
+  server5:
+    container_name: server5
+    image: server
+    environment:
+      - SERVER_NAME=five
+      - SERVER_PORT=8005
+
+
+
+
