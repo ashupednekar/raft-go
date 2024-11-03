@@ -8,6 +8,7 @@ services:
       - SERVER_PORT=8001
       - SERVERS=server2:8002,server3:8003,server4:8004,server5:8005
       - SERVER_COUNT=5
+    restart: always
 
   server2:
     container_name: server2
@@ -17,6 +18,7 @@ services:
       - SERVER_PORT=8002
       - SERVERS=server1:8001,server3:8003,server4:8004,server5:8005
       - SERVER_COUNT=5
+    restart: always
 
   server3:
     container_name: server3
@@ -26,6 +28,7 @@ services:
       - SERVER_PORT=8003
       - SERVERS=server1:8001,server2:8002,server4:8004,server5:8005
       - SERVER_COUNT=5
+    restart: always
 
   server4:
     container_name: server4
@@ -35,6 +38,7 @@ services:
       - SERVER_PORT=8004
       - SERVERS=server1:8001,server2:8002,server3:8003,server5:8005
       - SERVER_COUNT=5
+    restart: always
 
   server5:
     container_name: server5
@@ -44,5 +48,6 @@ services:
       - SERVER_PORT=8005
       - SERVERS=server1:8001,server2:8002,server3:8003,server4:8004
       - SERVER_COUNT=5
+    restart: always
 
 

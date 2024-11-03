@@ -18,21 +18,15 @@ func main(){
   go s.Start()
 
   go func(s *server.Server){
-    electionTimeout, err := time.ParseDuration(fmt.Sprintf("%dms", rand.Intn(2001)+ 2000))
+    electionTimeout, err := time.ParseDuration(fmt.Sprintf("%dms", rand.Intn(151)+ 150))
     if err != nil{
       log.Fatalf("error calculating election timeout: %v", err)
     }
     for {
-      fmt.Printf("last: %v", s.LastHeartBeat)
-      if s.LastHeartBeat.Before(time.Now().Add(-electionTimeout)) {
-          fmt.Printf("Condition met: Last heartbeat (%v) is older than current time (%v) minus election timeout (%v)\n", 
-              s.LastHeartBeat, time.Now(), electionTimeout)
+      if s.LastHeartBeat.Before(time.Now().Add(-electionTimeout-time.Millisecond * 100)){
+        fmt.Println("No viable leader found, initiating election")
         internal.InitiateElection(s)
-      } else {
-          fmt.Printf("Condition not met: Last heartbeat (%v) is NOT older than current time (%v) minus election timeout (%v)\n", 
-              s.LastHeartBeat, time.Now(), electionTimeout)
-      }
-
+      } 
       time.Sleep(electionTimeout)
     }
   }(&s)

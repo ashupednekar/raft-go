@@ -41,7 +41,7 @@ func InitiateElection(s *server.Server) error {
     wg.Add(1)
     go func(addr string){
       defer wg.Done()
-      fmt.Printf("requesting vote from server at: %s\n", addr)
+      fmt.Printf("requesting vote from server at: %s with term %d\n", addr, s.State.PersistentState.CurrentTerm)
       c, err := client.Connect(addr)
       if err != nil{
         results <- VoteResult{Addr: addr, Err: err}

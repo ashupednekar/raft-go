@@ -20,8 +20,7 @@ type AppendResult struct{
 
 func StartLeading(s *server.Server) {
   for{
-    time.Sleep(time.Millisecond * 5)
-
+    time.Sleep(time.Millisecond * 100)
     results := make(chan AppendResult)
     var wg sync.WaitGroup
     servers := strings.Split(os.Getenv("SERVERS"), ",")
@@ -48,13 +47,15 @@ func StartLeading(s *server.Server) {
       close(results)
     }()
 
-    for result := range results{
+    /*for result := range results{
       fmt.Printf("appendEntries result: %v\n", result)
-    }
-  
+    }*/
+
     select {
     case <- s.QuitLeadingChan:
+      fmt.Printf("Leader %d stepping down, is now a follower\n", s.State.Id)
       break
+    default:
     }
   }
 }

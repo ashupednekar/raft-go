@@ -8,6 +8,10 @@ const (
   Leader
 )
 
+func (w Role) String() string {
+	return [...]string{"Follower", "Candidate", "Leader"}[w]
+}
+
 type PersistentState struct{
   CurrentTerm int `json:"current_term"`
   VotedFor int `json:"voted_for"`
