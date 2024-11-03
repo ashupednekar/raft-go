@@ -1,4 +1,4 @@
-package internal
+package state
 
 import (
 	"encoding/json"
@@ -7,28 +7,9 @@ import (
 )
 
 
-type PersistentState struct{
-  CurrentTerm int `json:"current_term"`
-  VotedFor string `json:"voted_for"`
-}
-
-type LeaderState struct{
-  nextIndex map[string]int
-  matchIndex map[string]int
-}
-
-type State struct{
-  name string
-  commitIndex int
-  lastAppliedIndex int
-  persistent_state PersistentState
-  log []string
-}
-
-
 func (s *State) AppendLog(entry string) error {
-  s.log = append(s.log, entry)
-  file, err := os.OpenFile(fmt.Sprintf("%s.log", s.name), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+  s.Log = append(s.Log, entry)
+  file, err := os.OpenFile(fmt.Sprintf("%d.log", s.Id), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
   if err != nil{
     fmt.Printf("error opening log file: %v\n", err)
     return err
@@ -45,19 +26,18 @@ func (s *State) AppendLog(entry string) error {
 }
 
 func (s *State) SavePersistentState() error {
-  file, err := os.Create(fmt.Sprintf("%s.json", s.name))
+  file, err := os.Create(fmt.Sprintf("/tmp/data/%d.json", s.Id))
   if err != nil{
     fmt.Printf("error creating file: %v\n", err)
     return err
   }
   defer file.Close()
 
-  data, err := json.Marshal(s.persistent_state)
+  data, err := json.Marshal(s.PersistentState)
   if err != nil{
     fmt.Printf("error marshalling persistent state: %v\n", err)
     return err
   }
-
   _, err = file.Write(data)
   if err != nil{
     fmt.Printf("error writing to state file: %v\n", err)
@@ -68,7 +48,7 @@ func (s *State) SavePersistentState() error {
 }
 
 func (s *State) LoadPersistentState() error {
-  file, err := os.Open(fmt.Sprintf("%s.json", s.name))
+  file, err := os.Open(fmt.Sprintf("%d.json", s.Id))
   defer file.Close()
   if err != nil{
     fmt.Printf("error reading persistent state: %v\n", err)
@@ -80,7 +60,7 @@ func (s *State) LoadPersistentState() error {
     fmt.Printf("error reading file: %v\n", err)
     return err
   }
-  err = json.Unmarshal(buffer[:bytesRead], &s.persistent_state)
+  err = json.Unmarshal(buffer[:bytesRead], &s.PersistentState)
   if err != nil{
     fmt.Printf("error unmarshaling persistent state")
     return err

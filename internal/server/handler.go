@@ -3,33 +3,45 @@ package server
 import (
 	"context"
 	"fmt"
-	"log"
-	"net"
+	"time"
 
 	pb "github.com/ashupednekar/raft-go/internal/server/raft"
-	"google.golang.org/grpc"
+	"github.com/ashupednekar/raft-go/internal/state"
 )
 
-type server struct {
-  name string
-  pb.UnimplementedRaftServiceServer
-}
-
-func (s *server) AppendEntries(ctx context.Context, in *pb.EntryInput) (*pb.EntryResult, error){
-  return &pb.EntryResult{}, nil
-}
-
-func StartServer(name string, port int){
-  ln, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
-  if err != nil{
-    log.Fatalf("failed to listen at port 8001: %v", err)
+func (s *Server) AppendEntries(ctx context.Context, in *pb.EntryInput) (*pb.EntryResult, error){
+  s.LastHeartBeat = time.Now()
+  fmt.Printf("received heartbeat from %d\n", in.LeaderId)
+  if s.State.Role == state.Leader && in.Term >= int32(s.State.PersistentState.CurrentTerm){
+    fmt.Printf("server %d stepping down as leader\n", s.State.Id)
+    s.QuitLeadingChan <- true
+    s.State.Role = state.Follower
   }
-
-  s := grpc.NewServer()
-  pb.RegisterRaftServiceServer(s, &server{name: name})
-
-  log.Printf("gRPC server %s listening at %v", name, ln.Addr())
-  if err := s.Serve(ln); err != nil{
-    log.Fatalf("failed to start gRPC server: %v", err)
-  }
+  return &pb.EntryResult{Term: int32(s.State.PersistentState.CurrentTerm), Success: false}, nil
 }
+
+func (s *Server) RequestVote(ctx context.Context, in *pb.VoteInput) (*pb.VoteResult, error){
+  if in.Term < int32(s.State.PersistentState.CurrentTerm){
+    return &pb.VoteResult{Term: int32(s.State.PersistentState.CurrentTerm), VoteGranted: false}, nil
+  }else{
+    //same term
+    if in.Term == int32(s.State.PersistentState.CurrentTerm){
+      if s.State.PersistentState.VotedFor != int(in.CandidateId) && s.State.PersistentState.VotedFor != 0{
+        // TODO: add log check
+        s.State.PersistentState.CurrentTerm = int(in.Term)
+        s.State.PersistentState.VotedFor = int(in.CandidateId)
+        s.State.SavePersistentState()
+        return &pb.VoteResult{Term: int32(s.State.PersistentState.CurrentTerm), VoteGranted: true}, nil
+      }else{
+        return &pb.VoteResult{Term: int32(s.State.PersistentState.CurrentTerm), VoteGranted: false}, nil
+      }
+    }else{
+      //new term
+      s.State.PersistentState.VotedFor = int(in.CandidateId)
+      s.State.PersistentState.CurrentTerm = int(in.Term)
+      s.State.SavePersistentState()
+      //TODO: add log check
+      return &pb.VoteResult{Term: in.Term, VoteGranted: true}, nil
+    }
+  }
+} 

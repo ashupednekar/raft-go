@@ -4,42 +4,60 @@ services:
     container_name: server1
     image: server
     environment:
-      - SERVER_NAME=one
+      - SERVER_ID=1
       - SERVER_PORT=8001
-      - SERVERS=8002,8003,8004,8005
+      - SERVERS=server2:8002,server3:8003,server4:8004,server5:8005
+      - SERVER_COUNT=5
+    volumes:
+      - ./data:/tmp/data
+    restart: always
 
   server2:
     container_name: server2
     image: server
     environment:
-      - SERVER_NAME=two
+      - SERVER_ID=2
       - SERVER_PORT=8002
-      - SERVERS=8001,8003,8004,8005
+      - SERVERS=server1:8001,server3:8003,server4:8004,server5:8005
+      - SERVER_COUNT=5
+    volumes:
+      - ./data:/tmp/data
+    restart: always
 
   server3:
     container_name: server3
     image: server
     environment:
-      - SERVER_NAME=three
+      - SERVER_ID=3
       - SERVER_PORT=8003
-      - SERVERS=8001,8002,8004,8005
- 
+      - SERVERS=server1:8001,server2:8002,server4:8004,server5:8005
+      - SERVER_COUNT=5
+    volumes:
+      - ./data:/tmp/data
+    restart: always
+
   server4:
     container_name: server4
     image: server
     environment:
-      - SERVER_NAME=four
+      - SERVER_ID=4
       - SERVER_PORT=8004
-      - SERVERS=8001,8002,8003,8005
+      - SERVERS=server1:8001,server2:8002,server3:8003,server5:8005
+      - SERVER_COUNT=5
+    volumes:
+      - ./data:/tmp/data
+    restart: always
 
   server5:
     container_name: server5
     image: server
     environment:
-      - SERVER_NAME=five
+      - SERVER_ID=5
       - SERVER_PORT=8005
-      - SERVERS=8001,8002,8003,8004
-
-
+      - SERVERS=server1:8001,server2:8002,server3:8003,server4:8004
+      - SERVER_COUNT=5
+    volumes:
+      - ./data:/tmp/data
+    restart: always
 
 
