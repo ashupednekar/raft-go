@@ -18,7 +18,7 @@ func main(){
   go s.Start()
 
   go func(s *server.Server){
-    electionTimeout, err := time.ParseDuration(fmt.Sprintf("%dms", rand.Intn(151)+ 150))
+    electionTimeout, err := time.ParseDuration(fmt.Sprintf("%dms", rand.Intn(1001) + 1000))
     if err != nil{
       log.Fatalf("error calculating election timeout: %v", err)
     }
