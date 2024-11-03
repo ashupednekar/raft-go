@@ -13,7 +13,6 @@ import (
 )
 
 type Server struct {
-  Id int 
   State state.State
   LastHeartBeat time.Time
   pb.UnimplementedRaftServiceServer
@@ -44,7 +43,8 @@ func (s *Server) RequestVote(ctx context.Context, in *pb.VoteInput) (*pb.VoteRes
   }
 } 
 
-func (s *Server) Start (name string, port int){
+func (s *Server) Start (id int, port int){
+  s.State.Id = id 
   ln, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
   if err != nil{
     log.Fatalf("failed to listen at port 8001: %v", err)
@@ -53,7 +53,7 @@ func (s *Server) Start (name string, port int){
   grpcServer := grpc.NewServer()
   pb.RegisterRaftServiceServer(grpcServer, s)
 
-  log.Printf("gRPC server %s listening at %v", name, ln.Addr())
+  log.Printf("gRPC server %d listening at %v as %v", s.State.Id, ln.Addr(), s.State.Role)
   if err := grpcServer.Serve(ln); err != nil{
     log.Fatalf("failed to start gRPC server: %v", err)
   }

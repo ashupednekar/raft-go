@@ -21,7 +21,11 @@ func main(){
   s := server.Server{}
   s.LastHeartBeat = time.Now()
 
-  go s.Start(os.Getenv("SERVER_ID"), port)
+  server_id, err := strconv.Atoi(os.Getenv("SERVER_ID"))
+  if err != nil{
+    log.Fatalf("SERVER_ID env missing: %v\n", err)
+  }
+  go s.Start(server_id, port)
 
   go func(s *server.Server){
     electionTimeout, err := time.ParseDuration(fmt.Sprintf("%dms", rand.Intn(6000)+ 5850))

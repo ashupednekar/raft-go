@@ -6,7 +6,8 @@ services:
     environment:
       - SERVER_ID=1
       - SERVER_PORT=8001
-      - SERVERS=8002,8003,8004,8005
+      - SERVERS=server2:8002,server3:8003,server4:8004,server5:8005
+      - SERVER_COUNT=5
 
   server2:
     container_name: server2
@@ -14,7 +15,8 @@ services:
     environment:
       - SERVER_ID=2
       - SERVER_PORT=8002
-      - SERVERS=8001,8003,8004,8005
+      - SERVERS=server1:8001,server3:8003,server4:8004,server5:8005
+      - SERVER_COUNT=5
 
   server3:
     container_name: server3
@@ -22,15 +24,17 @@ services:
     environment:
       - SERVER_ID=3
       - SERVER_PORT=8003
-      - SERVERS=8001,8002,8004,8005
- 
+      - SERVERS=server1:8001,server2:8002,server4:8004,server5:8005
+      - SERVER_COUNT=5
+
   server4:
     container_name: server4
     image: server
     environment:
       - SERVER_ID=4
       - SERVER_PORT=8004
-      - SERVERS=8001,8002,8003,8005
+      - SERVERS=server1:8001,server2:8002,server3:8003,server5:8005
+      - SERVER_COUNT=5
 
   server5:
     container_name: server5
@@ -38,8 +42,7 @@ services:
     environment:
       - SERVER_ID=5
       - SERVER_PORT=8005
-      - SERVERS=8001,8002,8003,8004
-
-
+      - SERVERS=server1:8001,server2:8002,server3:8003,server4:8004
+      - SERVER_COUNT=5
 
 
