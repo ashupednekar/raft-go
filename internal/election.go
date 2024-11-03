@@ -7,7 +7,6 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/ashupednekar/raft-go/internal"
 	"github.com/ashupednekar/raft-go/internal/client"
 	"github.com/ashupednekar/raft-go/internal/server"
 	"github.com/ashupednekar/raft-go/internal/state"
@@ -23,7 +22,7 @@ type VoteResult struct{
 
 
 func InitiateElection(s *server.Server) error {
-  s.State.PersistentState.CurrentTerm = s.State.PersistentState.CurrentTerm + 1
+  s.State.PersistentState.CurrentTerm++
   s.State.PersistentState.VotedFor = s.State.Id
   s.State.Role = state.Candidate
   s.State.SavePersistentState()
@@ -61,7 +60,7 @@ func InitiateElection(s *server.Server) error {
     close(results)
   }()
 
-  var count int
+  count := 1
   for result := range results{
     fmt.Printf("Vote result from server at: %s - %v with term %d\n", result.Addr, result.VoteGranted, result.Term)
     if result.VoteGranted{
@@ -71,8 +70,8 @@ func InitiateElection(s *server.Server) error {
 
   fmt.Printf("Total votes received for server %d: %d, majority needed: %d\n", s.State.Id, count, majority)
   if count >= majority{
-    fmt.Printf("election complete, winner: server: %d", s.State.Id)
-    internal.StartLeading()
+    fmt.Printf("election complete, winner: server: %d\n", s.State.Id)
+    StartLeading(s)
   }else{
     fmt.Printf("server %d countn't obtain majority votes, election failed\n", s.State.Id)
   }

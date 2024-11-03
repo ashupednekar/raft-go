@@ -20,6 +20,7 @@ type LeaderState struct{
 
 type State struct{
   Id int 
+  Port int
   CommitIndex int
   LastAppliedIndex int
   PersistentState PersistentState

@@ -33,17 +33,17 @@ func RequestVote(client pb.RaftServiceClient, s *server.Server) (int, bool, erro
   return int(r.Term), r.VoteGranted, nil
 }
 
-func AppendEntries(client pb.RaftServiceClient) (int, bool, error) {
+func AppendEntries(client pb.RaftServiceClient, s *server.Server) (int, bool, error) {
   ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond * 100)
   defer cancel()
   r, err := client.AppendEntries(ctx, &pb.EntryInput{
+    Term: int32(s.State.PersistentState.CurrentTerm),
+    LeaderId: int32(s.State.Id),
     // TODO: fill rest of the fields
   })
   if err != nil{
     fmt.Printf("appendEntries rpc call failed: %v\n", err)
     return 0, false, err
   }
-  fmt.Printf("appendEntries result: %v", r)
-  
   return int(r.Term), r.Success, nil
 }

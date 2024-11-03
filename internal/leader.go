@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/ashupednekar/raft-go/internal/client"
+	"github.com/ashupednekar/raft-go/internal/server"
 )
 
 type AppendResult struct{
@@ -17,9 +18,10 @@ type AppendResult struct{
   Term int
 }
 
-func StartLeading(quitChan chan bool) {
+func StartLeading(s *server.Server) {
   for{
-    time.Sleep(time.Millisecond * 1000)
+    time.Sleep(time.Millisecond * 5)
+
     results := make(chan AppendResult)
     var wg sync.WaitGroup
     servers := strings.Split(os.Getenv("SERVERS"), ",")
@@ -32,7 +34,7 @@ func StartLeading(quitChan chan bool) {
           fmt.Printf("couldnt's connect to follower at: %s\n", addr)
           results <- AppendResult{Addr: addr, Err: err} 
         }
-        term, success, err := client.AppendEntries(c)
+        term, success, err := client.AppendEntries(c, s)
         if err != nil{
           fmt.Printf("error appending entries at: %s\n", addr)
           results <- AppendResult{Addr: addr, Err: err} 
@@ -51,7 +53,7 @@ func StartLeading(quitChan chan bool) {
     }
   
     select {
-    case <- quitChan:
+    case <- s.QuitLeadingChan:
       break
     }
   }

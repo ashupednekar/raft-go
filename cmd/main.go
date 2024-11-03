@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
-	"os"
-	"strconv"
 	"time"
 
 	"github.com/ashupednekar/raft-go/internal"
@@ -13,31 +11,28 @@ import (
 )
 
 func main(){
-  port, err := strconv.Atoi(os.Getenv("SERVER_PORT"))
-  if err != nil{
-    log.Fatalf("port env not set: %v", err)
-  }
 
-  s := server.Server{}
+  s := server.NewServer()
   s.LastHeartBeat = time.Now()
 
-  server_id, err := strconv.Atoi(os.Getenv("SERVER_ID"))
-  if err != nil{
-    log.Fatalf("SERVER_ID env missing: %v\n", err)
-  }
-  go s.Start(server_id, port)
+  go s.Start()
 
   go func(s *server.Server){
-    electionTimeout, err := time.ParseDuration(fmt.Sprintf("%dms", rand.Intn(6000)+ 5850))
+    electionTimeout, err := time.ParseDuration(fmt.Sprintf("%dms", rand.Intn(2001)+ 2000))
     if err != nil{
       log.Fatalf("error calculating election timeout: %v", err)
     }
     for {
-      fmt.Printf("last: %v | now: %v| timeout: %v\n", s.LastHeartBeat, time.Now(), electionTimeout)
-      if s.LastHeartBeat.Before(time.Now().Add(-electionTimeout)){
-        fmt.Println("No viable leader found, initiating election")
+      fmt.Printf("last: %v", s.LastHeartBeat)
+      if s.LastHeartBeat.Before(time.Now().Add(-electionTimeout)) {
+          fmt.Printf("Condition met: Last heartbeat (%v) is older than current time (%v) minus election timeout (%v)\n", 
+              s.LastHeartBeat, time.Now(), electionTimeout)
         internal.InitiateElection(s)
-      } 
+      } else {
+          fmt.Printf("Condition not met: Last heartbeat (%v) is NOT older than current time (%v) minus election timeout (%v)\n", 
+              s.LastHeartBeat, time.Now(), electionTimeout)
+      }
+
       time.Sleep(electionTimeout)
     }
   }(&s)
