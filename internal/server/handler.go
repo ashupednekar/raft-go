@@ -12,17 +12,12 @@ import (
 func (s *Server) AppendEntries(ctx context.Context, in *pb.EntryInput) (*pb.EntryResult, error){
   s.LastHeartBeat = time.Now()
   fmt.Printf("received heartbeat from %d\n", in.LeaderId)
-  current_term := int32(s.State.PersistentState.CurrentTerm)
-
-  if in.Term >= current_term{
+  if s.State.Role == state.Leader && in.Term >= int32(s.State.PersistentState.CurrentTerm){
+    fmt.Printf("server %d stepping down as leader\n", s.State.Id)
+    s.QuitLeadingChan <- true
     s.State.Role = state.Follower
-    go func(){
-      s.QuitLeadingChan <- true
-    }()
-  }else{
-    return &pb.EntryResult{Term: current_term, Success: false}, nil
   }
-  return &pb.EntryResult{Term: current_term, Success: false}, nil
+  return &pb.EntryResult{Term: int32(s.State.PersistentState.CurrentTerm), Success: false}, nil
 }
 
 func (s *Server) RequestVote(ctx context.Context, in *pb.VoteInput) (*pb.VoteResult, error){
@@ -42,14 +37,11 @@ func (s *Server) RequestVote(ctx context.Context, in *pb.VoteInput) (*pb.VoteRes
       }
     }else{
       //new term
+      s.State.PersistentState.VotedFor = int(in.CandidateId)
       s.State.PersistentState.CurrentTerm = int(in.Term)
-      s.State.Role = state.Follower
-      go func(){
-        s.QuitLeadingChan <- true
-      }()
-      s.State.PersistentState.VotedFor = 0
-      //TODO: log check
-      return &pb.VoteResult{Term: int32(s.State.PersistentState.CurrentTerm), VoteGranted: true}, nil
+      s.State.SavePersistentState()
+      //TODO: add log check
+      return &pb.VoteResult{Term: in.Term, VoteGranted: true}, nil
     }
   }
 } 

@@ -26,7 +26,7 @@ func (s *State) AppendLog(entry string) error {
 }
 
 func (s *State) SavePersistentState() error {
-  file, err := os.Create(fmt.Sprintf("%d.json", s.Id))
+  file, err := os.Create(fmt.Sprintf("/tmp/data/%d.json", s.Id))
   if err != nil{
     fmt.Printf("error creating file: %v\n", err)
     return err
@@ -38,7 +38,6 @@ func (s *State) SavePersistentState() error {
     fmt.Printf("error marshalling persistent state: %v\n", err)
     return err
   }
-
   _, err = file.Write(data)
   if err != nil{
     fmt.Printf("error writing to state file: %v\n", err)

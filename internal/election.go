@@ -2,6 +2,7 @@ package internal
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -41,7 +42,7 @@ func InitiateElection(s *server.Server) error {
     wg.Add(1)
     go func(addr string){
       defer wg.Done()
-      fmt.Printf("requesting vote from server at: %s with term %d\n", addr, s.State.PersistentState.CurrentTerm)
+      log.Printf("requesting vote from server at: %s with term %d\n", addr, s.State.PersistentState.CurrentTerm)
       c, err := client.Connect(addr)
       if err != nil{
         results <- VoteResult{Addr: addr, Err: err}
@@ -71,6 +72,7 @@ func InitiateElection(s *server.Server) error {
   fmt.Printf("Total votes received for server %d: %d, majority needed: %d\n", s.State.Id, count, majority)
   if count >= majority{
     fmt.Printf("election complete, winner: server: %d\n", s.State.Id)
+    s.State.Role = state.Leader
     StartLeading(s)
   }else{
     fmt.Printf("server %d countn't obtain majority votes, election failed\n", s.State.Id)

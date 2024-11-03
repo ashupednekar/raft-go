@@ -9,6 +9,7 @@ import (
 
 	"github.com/ashupednekar/raft-go/internal/client"
 	"github.com/ashupednekar/raft-go/internal/server"
+	"github.com/ashupednekar/raft-go/internal/state"
 )
 
 type AppendResult struct{
@@ -19,8 +20,8 @@ type AppendResult struct{
 }
 
 func StartLeading(s *server.Server) {
+  s.State.Role = state.Leader
   for{
-    time.Sleep(time.Millisecond * 100)
     results := make(chan AppendResult)
     var wg sync.WaitGroup
     servers := strings.Split(os.Getenv("SERVERS"), ",")
@@ -57,5 +58,6 @@ func StartLeading(s *server.Server) {
       break
     default:
     }
+    time.Sleep(time.Millisecond * 100)
   }
 }
