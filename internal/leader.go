@@ -19,38 +19,41 @@ type AppendResult struct{
   Term int
 }
 
+func SpawnAppends(s *server.Server) chan AppendResult {
+  results := make(chan AppendResult)
+  var wg sync.WaitGroup
+  servers := strings.Split(os.Getenv("SERVERS"), ",")
+  for _, addr := range servers{
+    wg.Add(1)
+    go func(addr string){
+      defer wg.Done()
+      c, err := client.Connect(addr)
+      if err != nil{
+        fmt.Printf("couldnt's connect to follower at: %s\n", addr)
+        results <- AppendResult{Addr: addr, Err: err} 
+      }
+      term, success, err := client.AppendEntries(c, s)
+      if err != nil{
+        fmt.Printf("error appending entries at: %s\n", addr)
+        results <- AppendResult{Addr: addr, Err: err} 
+      }
+      results <- AppendResult{Addr: addr, Success: success, Term: term, Err: nil} 
+    }(addr)
+  }
+
+  go func(){
+    wg.Wait()
+    close(results)
+  }()
+
+  return results
+}
+
 func StartLeading(s *server.Server) {
   s.State.Role = state.Leader
   for{
-    results := make(chan AppendResult)
-    var wg sync.WaitGroup
-    servers := strings.Split(os.Getenv("SERVERS"), ",")
-    for _, addr := range servers{
-      wg.Add(1)
-      go func(addr string){
-        defer wg.Done()
-        c, err := client.Connect(addr)
-        if err != nil{
-          fmt.Printf("couldnt's connect to follower at: %s\n", addr)
-          results <- AppendResult{Addr: addr, Err: err} 
-        }
-        term, success, err := client.AppendEntries(c, s)
-        if err != nil{
-          fmt.Printf("error appending entries at: %s\n", addr)
-          results <- AppendResult{Addr: addr, Err: err} 
-        }
-        results <- AppendResult{Addr: addr, Success: success, Term: term, Err: nil} 
-      }(addr)
-    }
 
-    go func(){
-      wg.Wait()
-      close(results)
-    }()
-
-    /*for result := range results{
-      fmt.Printf("appendEntries result: %v\n", result)
-    }*/
+    SpawnAppends(s)
 
     select {
     case <- s.QuitLeadingChan:
