@@ -15,6 +15,7 @@ func (w Role) String() string {
 type PersistentState struct{
   CurrentTerm int `json:"current_term"`
   VotedFor int `json:"voted_for"`
+  LeaderId int `json:"leader_id"`
 }
 
 type LeaderState struct{
