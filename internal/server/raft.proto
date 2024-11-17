@@ -38,3 +38,25 @@ message VoteResult{
   int32 term = 1;
   bool voteGranted = 2;
 }
+
+service FileService{
+  rpc Write(File) returns (WriteResult);
+  rpc Read(Name) returns (ReadResult);
+}
+
+message File{
+  string name = 1;
+  string content = 2;
+}
+
+message Name{
+  string name = 1;
+}
+
+message WriteResult{
+  bool ok = 1;
+}
+
+message ReadResult{
+  string conten = 1;
+}
