@@ -10,6 +10,8 @@ services:
       - SERVER_COUNT=5
     volumes:
       - ./data:/tmp/data
+    ports:
+      - "8001:8001"
     restart: always
 
   server2:
@@ -22,6 +24,8 @@ services:
       - SERVER_COUNT=5
     volumes:
       - ./data:/tmp/data
+    ports:
+      - "8002:8002"
     restart: always
 
   server3:
@@ -34,6 +38,8 @@ services:
       - SERVER_COUNT=5
     volumes:
       - ./data:/tmp/data
+    ports:
+      - "8003:8003"
     restart: always
 
   server4:
@@ -46,6 +52,8 @@ services:
       - SERVER_COUNT=5
     volumes:
       - ./data:/tmp/data
+    ports:
+      - "8004:8004"
     restart: always
 
   server5:
@@ -58,6 +66,8 @@ services:
       - SERVER_COUNT=5
     volumes:
       - ./data:/tmp/data
+    ports:
+      - "8005:8005"
     restart: always
 
 

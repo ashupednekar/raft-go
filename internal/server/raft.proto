@@ -58,5 +58,5 @@ message WriteResult{
 }
 
 message ReadResult{
-  string conten = 1;
+  string content = 1;
 }

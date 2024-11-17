@@ -11,7 +11,6 @@ import (
 
 func (s *Server) AppendEntries(ctx context.Context, in *pb.EntryInput) (*pb.EntryResult, error){
   s.LastHeartBeat = time.Now()
-  fmt.Printf("received heartbeat from %d\n", in.LeaderId)
   if s.State.Role == state.Leader && in.Term >= int32(s.State.PersistentState.CurrentTerm){
     fmt.Printf("server %d stepping down as leader\n", s.State.Id)
     s.QuitLeadingChan <- true
@@ -44,4 +43,23 @@ func (s *Server) RequestVote(ctx context.Context, in *pb.VoteInput) (*pb.VoteRes
       return &pb.VoteResult{Term: in.Term, VoteGranted: true}, nil
     }
   }
-} 
+}
+
+func (s *Server) Write(ctx context.Context, in *pb.File) (*pb.WriteResult, error){
+  return &pb.WriteResult{Ok: true}, nil
+}
+
+func (s *Server) Read(ctx context.Context, in *pb.Name) (*pb.ReadResult, error){
+  return &pb.ReadResult{Content: ""}, nil
+}
+
+
+
+
+
+
+
+
+
+
+
