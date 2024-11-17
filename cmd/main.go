@@ -9,6 +9,8 @@ import (
 	"github.com/ashupednekar/raft-go/internal/server"
 )
 
+//TODO: refactor into maintenable sub-packages
+
 func main(){
   s := server.NewServer()
   s.LastHeartBeat = time.Now()
