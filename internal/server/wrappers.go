@@ -1,11 +1,10 @@
-package client
+package server 
 
 import (
 	"context"
 	"fmt"
 	"time"
 
-	"github.com/ashupednekar/raft-go/internal/server"
 	pb "github.com/ashupednekar/raft-go/internal/server/raft"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -19,7 +18,7 @@ func Connect(addr string) (pb.RaftServiceClient, error) {
   return pb.NewRaftServiceClient(conn), nil
 }
 
-func RequestVote(client pb.RaftServiceClient, s *server.Server) (int, bool, error){
+func RequestVote(client pb.RaftServiceClient, s *Server) (int, bool, error){
   ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond * 100)
   defer cancel()
   r, err := client.RequestVote(ctx, &pb.VoteInput{
@@ -33,7 +32,7 @@ func RequestVote(client pb.RaftServiceClient, s *server.Server) (int, bool, erro
   return int(r.Term), r.VoteGranted, nil
 }
 
-func AppendEntries(client pb.RaftServiceClient, s *server.Server) (int, bool, error) {
+func AppendEntries(client pb.RaftServiceClient, s *Server) (int, bool, error) {
   ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond * 100)
   defer cancel()
   r, err := client.AppendEntries(ctx, &pb.EntryInput{

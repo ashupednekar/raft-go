@@ -6,7 +6,6 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/ashupednekar/raft-go/internal"
 	"github.com/ashupednekar/raft-go/internal/server"
 )
 
@@ -25,7 +24,7 @@ func main(){
     for {
       if s.LastHeartBeat.Before(time.Now().Add(-electionTimeout-time.Millisecond * 100)){
         fmt.Println("No viable leader found, initiating election")
-        internal.InitiateElection(s)
+        server.InitiateElection(s)
       } 
       time.Sleep(electionTimeout)
     }

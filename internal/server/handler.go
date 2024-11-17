@@ -53,8 +53,8 @@ func (s *Server) RequestVote(ctx context.Context, in *pb.VoteInput) (*pb.VoteRes
 func (s *Server) Write(ctx context.Context, in *pb.File) (*pb.WriteResult, error){
   if s.State.Role == state.Leader{
     log.Printf("leader: server%d received request, processing", s.State.Id)
-    //TODO: append entries
-    //TODO: commit changes after 2PC
+    s.State.Log = append(s.State.Log, "write~~%s~~%s", in.Name, in.Content)
+    SpawnAppends(s)
     return &pb.WriteResult{Ok: true}, nil
   }else{
     log.Printf("received, request... server%d not a leader, redirecting to server %d", s.State.Id, s.State.PersistentState.LeaderId)

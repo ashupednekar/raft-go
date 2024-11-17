@@ -1,4 +1,4 @@
-package internal
+package server 
 
 import (
 	"fmt"
@@ -9,7 +9,6 @@ import (
 	"sync"
 
 	"github.com/ashupednekar/raft-go/internal/client"
-	"github.com/ashupednekar/raft-go/internal/server"
 	"github.com/ashupednekar/raft-go/internal/state"
 )
 
@@ -22,7 +21,7 @@ type VoteResult struct{
 }
 
 
-func InitiateElection(s *server.Server) error {
+func InitiateElection(s *Server) error {
   s.State.PersistentState.CurrentTerm++
   s.State.PersistentState.VotedFor = s.State.Id
   s.State.Role = state.Candidate

@@ -1,4 +1,4 @@
-package internal
+package server 
 
 import (
 	"fmt"
@@ -7,8 +7,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ashupednekar/raft-go/internal/client"
-	"github.com/ashupednekar/raft-go/internal/server"
 	"github.com/ashupednekar/raft-go/internal/state"
 )
 
@@ -19,7 +17,7 @@ type AppendResult struct{
   Term int
 }
 
-func SpawnAppends(s *server.Server) chan AppendResult {
+func SpawnAppends(s *Server) chan AppendResult {
   results := make(chan AppendResult)
   var wg sync.WaitGroup
   servers := strings.Split(os.Getenv("SERVERS"), ",")
@@ -27,12 +25,12 @@ func SpawnAppends(s *server.Server) chan AppendResult {
     wg.Add(1)
     go func(addr string){
       defer wg.Done()
-      c, err := client.Connect(addr)
+      c, err := Connect(addr)
       if err != nil{
         fmt.Printf("couldnt's connect to follower at: %s\n", addr)
         results <- AppendResult{Addr: addr, Err: err} 
       }
-      term, success, err := client.AppendEntries(c, s)
+      term, success, err := AppendEntries(c, s)
       if err != nil{
         fmt.Printf("error appending entries at: %s\n", addr)
         results <- AppendResult{Addr: addr, Err: err} 
@@ -49,7 +47,7 @@ func SpawnAppends(s *server.Server) chan AppendResult {
   return results
 }
 
-func StartLeading(s *server.Server) {
+func StartLeading(s *Server) {
   s.State.Role = state.Leader
   for{
 
