@@ -18,6 +18,7 @@ type Server struct {
   LastHeartBeat time.Time
   QuitLeadingChan chan bool
   pb.UnimplementedRaftServiceServer
+  pb.UnimplementedFileServiceServer
 }
 
 func NewServer() Server {
@@ -42,6 +43,7 @@ func (s *Server) Start (){
 
   grpcServer := grpc.NewServer()
   pb.RegisterRaftServiceServer(grpcServer, s)
+  pb.RegisterFileServiceServer(grpcServer, s)
 
   log.Printf("gRPC server %d listening at %v as %v", s.State.Id, ln.Addr(), s.State.Role)
   if err := grpcServer.Serve(ln); err != nil{
