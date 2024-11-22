@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
+	"strconv"
 	"time"
 
 	pb "github.com/ashupednekar/raft-go/internal/server/raft"
@@ -54,8 +56,31 @@ func (s *Server) Write(ctx context.Context, in *pb.File) (*pb.WriteResult, error
   if s.State.Role == state.Leader{
     log.Printf("leader: server%d received request, processing", s.State.Id)
     s.State.Log = append(s.State.Log, "write~~%s~~%s", in.Name, in.Content)
-    SpawnAppends(s)
-    return &pb.WriteResult{Ok: true}, nil
+    s.State.CommitIndex++;
+    results := SpawnAppends(s)
+    server_count, err := strconv.Atoi(os.Getenv("SERVER_COUNT"))
+    if err != nil{
+      fmt.Println("error reading server count env")
+    }
+    majority := server_count / 2 + 1
+    count := 0
+    for range(results){
+      count++
+    }
+    if count >= majority{
+      //do commit
+      file, err := os.Create(in.Name)
+      if err != nil{
+        fmt.Printf("error creating file: %v\n", err)
+        return &pb.WriteResult{}, err
+      }
+      _, err = file.WriteString(in.Content)
+      if err != nil{
+        fmt.Printf("error writing to file: %v\n", err)
+      }
+      return &pb.WriteResult{Ok: true}, nil
+    }
+    return &pb.WriteResult{}, fmt.Errorf("no quorum") 
   }else{
     log.Printf("received, request... server%d not a leader, redirecting to server %d", s.State.Id, s.State.PersistentState.LeaderId)
     leaderAddr := fmt.Sprintf("server%d:800%d", s.State.PersistentState.LeaderId, s.State.PersistentState.LeaderId)

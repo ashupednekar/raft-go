@@ -35,9 +35,12 @@ func RequestVote(client pb.RaftServiceClient, s *Server) (int, bool, error){
 func AppendEntries(client pb.RaftServiceClient, s *Server) (int, bool, error) {
   ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond * 100)
   defer cancel()
+  entries := make([]*pb.Entry, len(s.State.Log))
+  entries = append(entries, &pb.Entry{Name: s.State.Log[s.State.LastAppliedIndex]})
   r, err := client.AppendEntries(ctx, &pb.EntryInput{
     Term: int32(s.State.PersistentState.CurrentTerm),
     LeaderId: int32(s.State.Id),
+    Entries: entries,
     // TODO: fill rest of the fields
   })
   if err != nil{

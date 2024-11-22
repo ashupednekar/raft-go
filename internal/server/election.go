@@ -8,7 +8,6 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/ashupednekar/raft-go/internal/client"
 	"github.com/ashupednekar/raft-go/internal/state"
 )
 
@@ -42,11 +41,11 @@ func InitiateElection(s *Server) error {
     go func(addr string){
       defer wg.Done()
       log.Printf("requesting vote from server at: %s with term %d\n", addr, s.State.PersistentState.CurrentTerm)
-      c, err := client.Connect(addr)
+      c, err := Connect(addr)
       if err != nil{
         results <- VoteResult{Addr: addr, Err: err}
       }
-      term, voteResult, err := client.RequestVote(c, s)
+      term, voteResult, err := RequestVote(c, s)
       if err != nil{
         fmt.Printf("error requesting vote from server at: %s - %v\n", addr, err)
         results <- VoteResult{Addr: addr, Err: err}
