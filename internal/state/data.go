@@ -23,6 +23,12 @@ type LeaderState struct{
   matchIndex map[string]int
 }
 
+type LogEntry struct{
+  Term int
+  Index int
+  Command string
+}
+
 type State struct{
   Id int 
   Port int
@@ -30,7 +36,7 @@ type State struct{
   LastAppliedIndex int
   PersistentState PersistentState
   Role Role
-  Log []string
+  Log []LogEntry
 }
 
 

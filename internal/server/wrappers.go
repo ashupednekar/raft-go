@@ -39,10 +39,20 @@ func AppendEntries(client pb.RaftServiceClient, s *Server) (int, bool, error) {
   if len(s.State.Log) != 0{
     entries = append(entries, &pb.Entry{Name: s.State.Log[s.State.CommitIndex]})
   }
+
+  prevLogIndex := len(s.State.Log) - 1
+  prevLogTerm := 0
+  if len(s.State.Log) != 0{
+    prevLogTerm = s.State.Log[prevLogIndex].Term
+  }
+
   r, err := client.AppendEntries(ctx, &pb.EntryInput{
     Term: int32(s.State.PersistentState.CurrentTerm),
     LeaderId: int32(s.State.Id),
     Entries: entries,
+    PrevLogIndex: int32(prevLogIndex),
+    PrevLogTerm: int32(prevLogTerm),
+
     // TODO: fill rest of the fields
   })
   if err != nil{

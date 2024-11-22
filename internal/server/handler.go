@@ -23,7 +23,17 @@ func (s *Server) AppendEntries(ctx context.Context, in *pb.EntryInput) (*pb.Entr
   s.State.Role = state.Follower
   s.State.PersistentState.LeaderId = int(in.LeaderId) 
   s.State.SavePersistentState()
-  return &pb.EntryResult{Term: int32(s.State.PersistentState.CurrentTerm), Success: false}, nil
+
+  //ok := &pb.EntryResult{Term: int32(s.State.PersistentState.CurrentTerm), Success: true}
+  nope := &pb.EntryResult{Term: int32(s.State.PersistentState.CurrentTerm), Success: false}
+
+  if in.Term < int32(s.State.PersistentState.CurrentTerm){
+    return nope, nil
+  }
+
+  fmt.Printf("received: %v\n", in)
+
+  return nope, nil
 }
 
 func (s *Server) RequestVote(ctx context.Context, in *pb.VoteInput) (*pb.VoteResult, error){
