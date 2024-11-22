@@ -64,11 +64,13 @@ func (s *Server) Write(ctx context.Context, in *pb.File) (*pb.WriteResult, error
     }
     majority := server_count / 2 + 1
     count := 0
-    for range(results){
-      count++
+    for res := range(results){
+      if res.Success{
+        count++
+      }
     }
-    if count >= majority{
-      //do commit
+    if (count >= majority){
+      fmt.Println("quorum achieved, proceeding to commit")
       file, err := os.Create(in.Name)
       if err != nil{
         fmt.Printf("error creating file: %v\n", err)
@@ -79,8 +81,10 @@ func (s *Server) Write(ctx context.Context, in *pb.File) (*pb.WriteResult, error
         fmt.Printf("error writing to file: %v\n", err)
       }
       return &pb.WriteResult{Ok: true}, nil
+    } else{
+      fmt.Printf("quorum not reached, no. of successful appends: %d\n", count) 
+      return &pb.WriteResult{}, fmt.Errorf("no quorum") 
     }
-    return &pb.WriteResult{}, fmt.Errorf("no quorum") 
   }else{
     log.Printf("received, request... server%d not a leader, redirecting to server %d", s.State.Id, s.State.PersistentState.LeaderId)
     leaderAddr := fmt.Sprintf("server%d:800%d", s.State.PersistentState.LeaderId, s.State.PersistentState.LeaderId)
